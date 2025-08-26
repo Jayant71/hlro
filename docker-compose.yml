@@ -1,0 +1,39 @@
+services:
+  # 1. PostgreSQL + PostGIS Database
+  postgres:
+    image: postgis/postgis:16-master
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=logistics_db
+    volumes:
+      - ./docker-data/postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # 2. OSRM Routing Engine (requires pre-processed map data)
+  osrm:
+    image: osrm/osrm-backend:v5.25.0
+    volumes:
+      - ./docker-data/osrm-data:/data
+    ports:
+      - "5000:5000"
+    command: osrm-routed /data/map.osrm --max-table-size 8000
+    restart: always
+
+  # 3. Nominatim Geocoding Engine (requires initial import)
+  nominatim:
+    image: mediagis/nominatim:5.1
+    environment:
+      - PBF_URL=https://download.geofabrik.de/asia/india/central-zone-latest.osm.pbf
+      - REPLICATION_URL=
+    volumes:
+      - ./docker-data/nominatim-data:/var/lib/postgresql/14/main
+    ports:
+      - "8080:8080"
+    restart: always
+
+  # 4. Backend API (will be added in Phase 2)
+
+  # 5. Frontend App (will be added in Phase 3)

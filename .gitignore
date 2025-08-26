@@ -1,0 +1,43 @@
+# General System Files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+# Ignore the persistent data volumes for your services.
+# This is important as this data can become very large.
+/docker-data/
+
+# ----------------------------------------------------------------
+# Next.js Application Specific (inside /next-app/)
+# ----------------------------------------------------------------
+
+# Dependencies
+/next-app/node_modules/
+
+# Build directory
+/next-app/.next/
+
+# Production build
+/next-app/out/
+
+# Static exports
+/next-app/dist/
+
+# Environment variables
+# Never commit your secrets!
+/next-app/.env.local
+/next-app/.env.development.local
+/next-app/.env.test.local
+/next-app/.env.production.local
+
+# Test results and coverage
+/next-app/coverage/
+
+# Next.js cache
+/next-app/.swc/
