@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom map marker styles */
+.custom-marker {
+  z-index: 1000 !important;
+  position: relative;
+}
+
+.mapboxgl-marker {
+  z-index: 1000 !important;
+}

@@ -1,5 +1,9 @@
+
+networks:
+  logistics-net:
+    driver: bridge
+
 services:
-  # 1. PostgreSQL + PostGIS Database
   postgres:
     image: postgis/postgis:16-master
     environment:
@@ -11,29 +15,54 @@ services:
     ports:
       - "5432:5432"
     restart: always
+    networks:
+      - logistics-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-  # 2. OSRM Routing Engine (requires pre-processed map data)
-  osrm:
-    image: osrm/osrm-backend:v5.25.0
+
+
+  migrations:
+    image: node:20-alpine
+    working_dir: /app
     volumes:
-      - ./docker-data/osrm-data:/data
-    ports:
-      - "5000:5000"
-    command: osrm-routed /data/map.osrm --max-table-size 8000
-    restart: always
-
-  # 3. Nominatim Geocoding Engine (requires initial import)
-  nominatim:
-    image: mediagis/nominatim:5.1
+      - ./next-app:/app
+    command: sh -c "npm install && npx sequelize-cli db:migrate"
     environment:
-      - PBF_URL=https://download.geofabrik.de/asia/india/central-zone-latest.osm.pbf
-      - REPLICATION_URL=
-    volumes:
-      - ./docker-data/nominatim-data:/var/lib/postgresql/14/main
+      - DATABASE_URL=postgres://user:password@postgres:5432/logistics_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - logistics-net
+
+  nextjs:
+    build:
+      context: ./next-app
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://user:password@postgres:5432/logistics_db
+      - MAPBOX_ACCESS_TOKEN=<your_mapbox_access_token>
+      - MAPBOX_DIRECTIONS_API=https://api.mapbox.com/directions/v5/mapbox/driving
+      - MAPBOX_GEOCODING_API=https://api.mapbox.com/geocoding/v5/mapbox.places
     ports:
-      - "8080:8080"
-    restart: always
-
-  # 4. Backend API (will be added in Phase 2)
-
-  # 5. Frontend App (will be added in Phase 3)
+      - "3000:3000"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    networks:
+      - logistics-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
