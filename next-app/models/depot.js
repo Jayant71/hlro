@@ -18,7 +18,9 @@ module.exports = (sequelize, DataTypes) => {
   }
   Depot.init({
     name: DataTypes.STRING,
-    address: DataTypes.TEXT
+    address: DataTypes.TEXT,
+    lat: DataTypes.FLOAT,
+    lng: DataTypes.FLOAT
   }, {
     sequelize,
     modelName: 'Depot',

@@ -15,6 +15,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   Stop.init({
     address: DataTypes.TEXT,
+    lat: DataTypes.FLOAT,
+    lng: DataTypes.FLOAT,
     sequence_order: DataTypes.INTEGER,
     status: DataTypes.STRING
   }, {
